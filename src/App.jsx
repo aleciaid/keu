@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { Plus } from 'lucide-react';
-import { seedDatabase } from './db/database';
+import { db, seedDatabase, resetDatabase } from './db/database';
+import { ThemeProvider } from './context/ThemeContext';
 import BottomNav from './components/BottomNav';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
@@ -11,9 +12,52 @@ import Settings from './pages/Settings';
 export default function App() {
   const [page, setPage] = useState('dashboard');
   const [dbReady, setDbReady] = useState(false);
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
+  
+  // Theme setup
+  useEffect(() => {
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    root.classList.remove('dark', 'light');
+    root.classList.add(savedTheme);
+  }, []);
 
   useEffect(() => {
-    seedDatabase().then(() => setDbReady(true));
+    const initializeDatabase = async () => {
+      try {
+        // Seed the database
+        await seedDatabase();
+        
+        // Set database as ready
+        setDbReady(true);
+      } catch (error) {
+        console.error('Database initialization failed:', error);
+        
+        // If initial seeding fails, try clearing and resetting
+        try {
+          console.log('Attempting database reset...');
+          await resetDatabase();
+          setDbReady(true);
+        } catch (resetError) {
+          console.error('Database reset also failed:', resetError);
+          
+          // Last resort: try one more time with a delay
+          setTimeout(async () => {
+            try {
+              await resetDatabase();
+              setDbReady(true);
+            } catch (finalError) {
+              console.error('Final database initialization attempt failed:', finalError);
+              // Show a user-friendly message but still try to load the app
+              console.warn('Database initialization failed multiple times. App may be unstable.');
+              setDbReady(true);
+            }
+          }, 1000);
+        }
+      }
+    };
+
+    initializeDatabase();
   }, []);
 
   // Register service worker
@@ -41,7 +85,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <ThemeProvider>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -59,7 +103,7 @@ export default function App() {
 
       <main className="min-h-screen">
         {page === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
-        {page === 'transactions' && <Transactions />}
+        {page === 'transactions' && <Transactions openModal={openTransactionModal} onModalStateChange={setOpenTransactionModal} />}
         {page === 'wallets' && <Wallets />}
         {page === 'settings' && <Settings />}
       </main>
@@ -68,12 +112,14 @@ export default function App() {
       {(page === 'dashboard' || page === 'transactions') && (
         <button
           onClick={() => {
-            setPage('transactions');
-            // Trigger modal open after navigation
-            setTimeout(() => {
-              const addBtn = document.querySelector('[data-fab-trigger]');
-              if (addBtn) addBtn.click();
-            }, 100);
+            if (page !== 'transactions') {
+              setPage('transactions');
+              setTimeout(() => {
+                setOpenTransactionModal(true);
+              }, 100);
+            } else {
+              setOpenTransactionModal(true);
+            }
           }}
           className="fab"
           aria-label="Add Transaction"
@@ -83,6 +129,6 @@ export default function App() {
       )}
 
       <BottomNav active={page} onNavigate={handleNavigate} />
-    </>
+    </ThemeProvider>
   );
 }

@@ -2,7 +2,8 @@ import Dexie from 'dexie';
 
 export const db = new Dexie('FinanceTracker');
 
-db.version(2).stores({
+// Use string IDs for non-auto-increment tables
+db.version(6).stores({
   wallets: 'id, name, createdAt, updatedAt',
   transactions: 'id, type, walletId, fromWalletId, toWalletId, categoryId, date, amount, createdAt, updatedAt',
   categories: 'id, name, type, createdAt, updatedAt',
@@ -11,7 +12,7 @@ db.version(2).stores({
   deviceInfo: 'key',
 });
 
-// Seed default categories
+// Default categories
 export const DEFAULT_CATEGORIES = [
   // Income
   { id: 'cat-income-gaji', name: 'Gaji', type: 'income', icon: '💰', color: '#10b981', isDefault: true },
@@ -29,42 +30,126 @@ export const DEFAULT_CATEGORIES = [
   { id: 'cat-expense-lainnya', name: 'Lainnya', type: 'expense', icon: '📦', color: '#64748b', isDefault: true },
 ];
 
-// Generate or retrieve device UUID
+// Device UUID generation
 export async function getDeviceUUID() {
-  const existingUUID = await db.deviceInfo.get('deviceUUID');
-  if (existingUUID) {
-    return existingUUID.value;
-  }
+  try {
+    const existingUUID = await db.deviceInfo.get('deviceUUID');
+    if (existingUUID) {
+      return existingUUID.value;
+    }
 
-  // Generate a new UUID if not exists
-  const newUUID = crypto.randomUUID();
-  await db.deviceInfo.put({ key: 'deviceUUID', value: newUUID });
-  return newUUID;
+    // Generate a new UUID if not exists
+    const newUUID = crypto.randomUUID();
+    await db.deviceInfo.put({ key: 'deviceUUID', value: newUUID });
+    return newUUID;
+  } catch (error) {
+    console.error('Failed to get device UUID:', error);
+    throw error;
+  }
 }
 
 export async function seedDatabase() {
-  const count = await db.categories.count();
-  if (count === 0) {
+  try {
     const now = new Date().toISOString();
-    await db.categories.bulkAdd(
-      DEFAULT_CATEGORIES.map(c => ({
-        ...c,
-        createdAt: now,
-        updatedAt: now,
-      }))
-    );
-  }
 
-  // Seed default settings
-  const webhookUrl = await db.settings.get('webhookUrl');
-  if (!webhookUrl) {
-    await db.settings.bulkPut([
-      { key: 'webhookUrl', value: '' },
-      { key: 'webhookEnabled', value: false },
-      { key: 'appVersion', value: '1.0.0' },
-    ]);
-  }
+    // 1. Seed categories safely
+    try {
+      const existingCategories = await db.categories.toArray();
+      
+      if (existingCategories.length === 0) {
+        // Only add if table is empty
+        for (const category of DEFAULT_CATEGORIES) {
+          try {
+            await db.categories.put({
+              ...category,
+              createdAt: now,
+              updatedAt: now,
+            });
+          } catch (e) {
+            // Skip duplicate entries
+            console.warn(`Skipping duplicate category: ${category.id}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error seeding categories:', error);
+    }
 
-  // Ensure device UUID is generated
-  await getDeviceUUID();
+    // 2. Seed default settings
+    try {
+      const settingsToCheck = [
+        { key: 'webhookUrl', value: '' },
+        { key: 'webhookEnabled', value: false },
+        { key: 'appVersion', value: '1.0.0' },
+        { key: 'theme', value: 'dark' },
+        { key: 'savingsGoalPercentage', value: 20 },
+      ];
+
+      for (const setting of settingsToCheck) {
+        const existingSetting = await db.settings.get(setting.key);
+        if (!existingSetting) {
+          await db.settings.put(setting);
+        }
+      }
+    } catch (error) {
+      console.error('Error seeding settings:', error);
+    }
+
+    // 3. Create default fixed savings wallet
+    try {
+      const allWallets = await db.wallets.toArray();
+      const fixedWalletExists = allWallets.some(w => w.isFixed === true);
+
+      if (!fixedWalletExists) {
+        await db.wallets.put({
+          id: `wallet-savings-${crypto.randomUUID()}`,
+          name: 'Tabungan Target',
+          createdAt: now,
+          updatedAt: now,
+          isFixed: true,
+          amount: 0,
+          icon: '💰',
+          color: '#10b981',
+          initialBalance: 0
+        });
+      }
+    } catch (error) {
+      console.error('Error seeding fixed wallet:', error);
+    }
+
+    // 4. Ensure device UUID is generated
+    try {
+      await getDeviceUUID();
+    } catch (error) {
+      console.error('Error generating device UUID:', error);
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Seeding database failed:', error);
+    throw error;
+  }
+}
+
+// Clear database completely
+export async function clearDatabase() {
+  try {
+    const tables = db.tables;
+    for (const table of tables) {
+      await table.clear();
+    }
+  } catch (error) {
+    console.error('Error clearing database:', error);
+  }
+}
+
+// Reset database to initial state
+export async function resetDatabase() {
+  try {
+    await clearDatabase();
+    await seedDatabase();
+  } catch (error) {
+    console.error('Error resetting database:', error);
+    throw error;
+  }
 }

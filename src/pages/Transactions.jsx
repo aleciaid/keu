@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
-import { formatIDR, formatDate } from '../utils/currency';
+import { formatIDR, formatDate, formatCompactIDR } from '../utils/currency';
 import { sendWebhook } from '../utils/webhook';
+import { calculateWalletBalances, calculateNetBalance, getAvailableBalanceForSpending } from '../utils/calculations';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import AmountInput from '../components/AmountInput';
@@ -21,12 +22,20 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
-export default function Transactions({ fabTrigger }) {
+export default function Transactions({ openModal, onModalStateChange }) {
   const wallets = useLiveQuery(() => db.wallets.toArray()) || [];
   const transactions = useLiveQuery(() => db.transactions.orderBy('date').reverse().toArray()) || [];
   const categories = useLiveQuery(() => db.categories.toArray()) || [];
 
   const [modalOpen, setModalOpen] = useState(false);
+
+  // Handle external modal open trigger
+  useEffect(() => {
+    if (openModal) {
+      openCreate();
+      if (onModalStateChange) onModalStateChange(false);
+    }
+  }, [openModal]);
   const [editTx, setEditTx] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -173,7 +182,27 @@ export default function Transactions({ fabTrigger }) {
           return;
         }
       }
-    } else {
+    } else if (txType === 'expense') {
+      if (!form.walletId) {
+        toast.error('Pilih wallet');
+        return;
+      }
+      if (!form.categoryId) {
+        toast.error('Pilih kategori');
+        return;
+      }
+      
+      // Check if expense exceeds available balance for the wallet
+      const walletBalance = walletBalances[form.walletId] || 0;
+      const availableForExpense = editTx && editTx.walletId === form.walletId 
+        ? walletBalance + editTx.amount 
+        : walletBalance;
+      
+      if (form.amount > availableForExpense) {
+        toast.error(`Saldo wallet tidak cukup. Tersedia: ${formatCompactIDR(availableForExpense)}`);
+        return;
+      }
+    } else if (txType === 'income') {
       if (!form.walletId) {
         toast.error('Pilih wallet');
         return;
@@ -282,11 +311,6 @@ export default function Transactions({ fabTrigger }) {
     toast.success('Transaksi berhasil dihapus');
     setDeleteId(null);
   };
-
-  // Expose open create for FAB
-  if (fabTrigger && !modalOpen) {
-    // This will be called from parent
-  }
 
   const filteredCategories = categories.filter((c) => c.type === txType);
 

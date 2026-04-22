@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { formatIDR, formatDate, formatCompactIDR } from '../utils/currency';
+import { calculateFinancialRatios } from '../utils/financialRatios';
+import { calculateWalletBalances, calculateNetBalance, calculateTotalBalance, getSavingsWalletBalance, getAvailableBalanceForSpending } from '../utils/calculations';
 import {
   TrendingUp,
   TrendingDown,
@@ -8,6 +11,9 @@ import {
   Wallet,
   DollarSign,
   ChevronRight,
+  Info,
+  AlertTriangle,
+  CheckCircle,
 } from 'lucide-react';
 
 export default function Dashboard({ onNavigate }) {
@@ -15,35 +21,40 @@ export default function Dashboard({ onNavigate }) {
   const transactions = useLiveQuery(() => db.transactions.orderBy('date').reverse().toArray()) || [];
   const categories = useLiveQuery(() => db.categories.toArray()) || [];
 
+  // Financial Health State
+  const [financialHealth, setFinancialHealth] = useState(null);
+
+  useEffect(() => {
+    const fetchFinancialHealth = async () => {
+      try {
+        const health = await calculateFinancialRatios();
+        setFinancialHealth(health);
+      } catch (error) {
+        console.error('Failed to calculate financial ratios:', error);
+        setFinancialHealth(null);
+      }
+    };
+    fetchFinancialHealth();
+  }, [transactions.length]);
+
   // Calculate totals
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59).toISOString();
 
   // Compute wallet balances
-  const walletBalances = {};
-  wallets.forEach((w) => {
-    walletBalances[w.id] = w.initialBalance || 0;
-  });
-
-  transactions.forEach((t) => {
-    if (t.type === 'income') {
-      walletBalances[t.walletId] = (walletBalances[t.walletId] || 0) + t.amount;
-    } else if (t.type === 'expense') {
-      walletBalances[t.walletId] = (walletBalances[t.walletId] || 0) - t.amount;
-    } else if (t.type === 'transfer') {
-      walletBalances[t.fromWalletId] = (walletBalances[t.fromWalletId] || 0) - t.amount;
-      walletBalances[t.toWalletId] = (walletBalances[t.toWalletId] || 0) + t.amount;
-    }
-  });
-
-  const totalBalance = Object.values(walletBalances).reduce((a, b) => a + b, 0);
+  const walletBalances = calculateWalletBalances(wallets, transactions);
+  
+  // Calculate different types of balances
+  const totalBalance = calculateTotalBalance(walletBalances);
+  const netBalance = calculateNetBalance(wallets, walletBalances); // Excluding savings
+  const savingsBalance = getSavingsWalletBalance(wallets, walletBalances);
 
   // Monthly summary
   const monthlyTx = transactions.filter((t) => t.date >= monthStart && t.date <= monthEnd);
   const monthlyIncome = monthlyTx.filter((t) => t.type === 'income').reduce((a, t) => a + t.amount, 0);
   const monthlyExpense = monthlyTx.filter((t) => t.type === 'expense').reduce((a, t) => a + t.amount, 0);
-  const netBalance = monthlyIncome - monthlyExpense;
+  const monthlyNetBalance = monthlyIncome - monthlyExpense;
 
   // Last 5 transactions
   const recentTx = transactions.slice(0, 5);
@@ -82,7 +93,7 @@ export default function Dashboard({ onNavigate }) {
       textColor: 'text-red-400',
     },
     {
-      label: 'Net Balance',
+      label: 'Net Balance (excl. Savings)',
       value: netBalance,
       icon: DollarSign,
       gradient: netBalance >= 0 ? 'from-blue-600 to-cyan-600' : 'from-orange-600 to-red-600',
@@ -124,6 +135,100 @@ export default function Dashboard({ onNavigate }) {
           );
         })}
       </div>
+
+      {/* Financial Health */}
+      {financialHealth && (
+        <div className="card mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-white">📊 Kesehatan Keuangan</h3>
+          </div>
+          {/* Current Ratios */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="text-center">
+              <p className="text-[10px] text-surface-400 mb-1">Hutang</p>
+              <p className={`text-sm font-bold ${financialHealth.debtRatio > financialHealth.ideal.debtPercentage ? 'text-red-400' : 'text-white'}`}>
+                {financialHealth.debtRatio.toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-surface-400 mb-1">Pengeluaran</p>
+              <p className={`text-sm font-bold ${financialHealth.expenseRatio > financialHealth.ideal.expensePercentage ? 'text-red-400' : 'text-white'}`}>
+                {financialHealth.expenseRatio.toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] text-surface-400 mb-1">Tabungan</p>
+              <p className={`text-sm font-bold ${financialHealth.savingsRatio < financialHealth.ideal.savingsPercentage ? 'text-red-400' : 'text-emerald-400'}`}>
+                {financialHealth.savingsRatio.toFixed(1)}%
+              </p>
+            </div>
+          </div>
+
+          {/* Ideal Breakdown */}
+          {financialHealth.ideal && financialHealth.totalIncome > 0 && (
+            <div className="bg-primary-500/10 border border-primary-500/30 rounded-xl p-3 mb-4">
+              <p className="text-[11px] font-semibold text-primary-300 mb-2">Target Ideal dari Rp {formatCompactIDR(financialHealth.totalIncome)}</p>
+              <div className="grid grid-cols-3 gap-2 text-[10px]">
+                <div>
+                  <p className="text-surface-500">Hutang ({financialHealth.ideal.debtPercentage}%)</p>
+                  <p className="font-bold text-white">{formatCompactIDR(financialHealth.ideal.debtAmount)}</p>
+                </div>
+                <div>
+                  <p className="text-surface-500">Pengeluaran ({financialHealth.ideal.expensePercentage}%)</p>
+                  <p className="font-bold text-white">{formatCompactIDR(financialHealth.ideal.expenseAmount)}</p>
+                </div>
+                <div>
+                  <p className="text-surface-500">Tabungan ({financialHealth.ideal.savingsPercentage}%)</p>
+                  <p className="font-bold text-emerald-400">{formatCompactIDR(financialHealth.ideal.savingsAmount)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {financialHealth.recommendations.map((rec, index) => {
+              const iconMap = {
+                warning: <AlertTriangle size={16} className="text-orange-400" />,
+                critical: <AlertTriangle size={16} className="text-red-400" />,
+                suggestion: <Info size={16} className="text-blue-400" />,
+                success: <CheckCircle size={16} className="text-emerald-400" />
+              };
+
+              const bgColorMap = {
+                warning: 'bg-orange-500/10 border-orange-500/30',
+                critical: 'bg-red-500/10 border-red-500/30',
+                suggestion: 'bg-blue-500/10 border-blue-500/30',
+                success: 'bg-emerald-500/10 border-emerald-500/30'
+              };
+
+              return (
+                <div 
+                  key={index} 
+                  className={`flex items-start gap-3 p-3 rounded-xl border ${bgColorMap[rec.type]}`}
+                >
+                  {iconMap[rec.type]}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white">{rec.title}</p>
+                    <p className="text-[11px] text-surface-500 mb-2">{rec.description}</p>
+                    {rec.nominal > 0 && (
+                      <div className="grid grid-cols-2 gap-2 text-[10px]">
+                        <div>
+                          <p className="text-surface-600">Target:</p>
+                          <p className="font-semibold text-white">{formatCompactIDR(rec.ideal)}</p>
+                        </div>
+                        <div>
+                          <p className="text-surface-600">Butuh Lagi:</p>
+                          <p className="font-semibold text-orange-400">{formatCompactIDR(rec.nominal)}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Wallet Distribution */}
       {wallets.length > 0 && (

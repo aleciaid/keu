@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { exportData, importData, validateImportData } from '../utils/exportImport';
 import { testWebhook } from '../utils/webhook';
 import { formatDateTime } from '../utils/currency';
+import { useTheme } from '../context/ThemeContext';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import toast from 'react-hot-toast';
@@ -22,13 +23,15 @@ import {
   ChevronRight,
   Shield,
   Info,
-  Settings2,
+  Moon,
+  Sun,
 } from 'lucide-react';
 
 const CATEGORY_ICONS = ['💰', '🎁', '📈', '📥', '🍕', '🚗', '📄', '🛍️', '🎬', '🏥', '📚', '📦', '🏠', '💡', '📱', '🎮', '🍔', '☕', '🚌', '✈️', '🎵', '💊', '🐕', '👶', '🏋️'];
 const CATEGORY_COLORS = ['#ef4444', '#f97316', '#eab308', '#10b981', '#14b8a6', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899', '#64748b'];
 
 export default function SettingsPage() {
+  const { theme, toggleTheme } = useTheme();
   const categories = useLiveQuery(() => db.categories.toArray()) || [];
   const logs = useLiveQuery(() => db.logs.orderBy('createdAt').reverse().limit(50).toArray()) || [];
   const webhookUrl = useLiveQuery(() => db.settings.get('webhookUrl'));
@@ -41,14 +44,14 @@ export default function SettingsPage() {
   const [whUrl, setWhUrl] = useState('');
   const [whEnabled, setWhEnabled] = useState(false);
   const [whTesting, setWhTesting] = useState(false);
-  const [whInitialized, setWhInitialized] = useState(false);
 
-  // Initialize webhook fields from DB
-  if (webhookUrl && !whInitialized) {
-    setWhUrl(webhookUrl.value || '');
-    setWhEnabled(webhookEnabled?.value || false);
-    setWhInitialized(true);
-  }
+  // Initialize webhook fields from DB using useEffect
+  useEffect(() => {
+    if (webhookUrl && webhookEnabled) {
+      setWhUrl(webhookUrl.value || '');
+      setWhEnabled(webhookEnabled.value || false);
+    }
+  }, [webhookUrl, webhookEnabled]);
 
   // Category modal
   const [catModalOpen, setCatModalOpen] = useState(false);
@@ -196,6 +199,7 @@ export default function SettingsPage() {
 
   const sections = [
     { id: 'categories', label: 'Kategori', icon: Tags, desc: 'Kelola kategori transaksi' },
+    { id: 'theme', label: 'Tema', icon: Moon, desc: 'Pengaturan tampilan' },
     { id: 'webhook', label: 'Webhook', icon: Webhook, desc: 'Integrasi webhook' },
     { id: 'data', label: 'Data', icon: Shield, desc: 'Import & Export data' },
     { id: 'logs', label: 'Activity Log', icon: FileText, desc: 'Riwayat aktivitas' },
@@ -235,19 +239,17 @@ export default function SettingsPage() {
             <button
               key={section.id}
               onClick={() => setActiveSection(isActive ? null : section.id)}
-              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${
-                isActive
+              className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${isActive
                   ? 'bg-primary-500/10 border border-primary-500/30'
                   : 'bg-surface-800/50 hover:bg-surface-800 border border-transparent'
-              }`}
+                }`}
             >
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                isActive ? 'bg-primary-500/20' : 'bg-surface-700/50'
-              }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? 'bg-primary-500/20' : 'bg-surface-700/50'
+                }`}>
                 <Icon size={18} className={isActive ? 'text-primary-400' : 'text-surface-400'} />
               </div>
               <div className="flex-1 text-left">
-                <p className={`text-sm font-semibold ${isActive ? 'text-white' : 'text-surface-300'}`}>
+                <p className={`text-sm font-semibold ${isActive ? 'text-primary-400' : 'text-surface-300'}`}>
                   {section.label}
                 </p>
                 <p className="text-[11px] text-surface-500">{section.desc}</p>
@@ -343,14 +345,12 @@ export default function SettingsPage() {
               </div>
               <button
                 onClick={() => setWhEnabled(!whEnabled)}
-                className={`w-12 h-7 rounded-full transition-all relative ${
-                  whEnabled ? 'bg-primary-500' : 'bg-surface-700'
-                }`}
+                className={`w-12 h-7 rounded-full transition-all relative ${whEnabled ? 'bg-primary-500' : 'bg-surface-700'
+                  }`}
               >
                 <span
-                  className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${
-                    whEnabled ? 'left-6' : 'left-1'
-                  }`}
+                  className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${whEnabled ? 'left-6' : 'left-1'
+                    }`}
                 />
               </button>
             </div>
@@ -386,7 +386,7 @@ export default function SettingsPage() {
                 <Info size={12} /> Payload Format
               </p>
               <pre className="text-[10px] text-surface-500 overflow-x-auto">
-{`{
+                {`{
   "event": "transaction_created",
   "timestamp": "ISO_DATE",
   "data": {
@@ -468,9 +468,39 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* Theme Section */}
+      {activeSection === 'theme' && (
+        <div className="card animate-scaleIn mb-6">
+          <h3 className="text-sm font-semibold text-white mb-4">Tema Tampilan</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-surface-800/50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-surface-700/50 flex items-center justify-center">
+                  {theme === 'dark' ? <Moon size={18} /> : <Sun size={18} />}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Mode {theme === 'dark' ? 'Gelap' : 'Terang'}</p>
+                  <p className="text-[11px] text-surface-500">Ubah warna latar belakang</p>
+                </div>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className={`w-12 h-7 rounded-full transition-all relative ${theme === 'dark' ? 'bg-primary-500' : 'bg-surface-700'
+                  }`}
+              >
+                <span
+                  className={`absolute top-1 w-5 h-5 rounded-full bg-white transition-all ${theme === 'dark' ? 'left-6' : 'left-1'
+                    }`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* App Info */}
       <div className="text-center py-4">
-        <p className="text-xs text-surface-600">FinanceTracker v1.0.0</p>
+        <p className="text-xs text-surface-600">FinanceTracker v1.9.0</p>
         <p className="text-[10px] text-surface-700 mt-1">Offline-first PWA • Data stored locally</p>
       </div>
 
@@ -497,21 +527,19 @@ export default function SettingsPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => setCatForm({ ...catForm, type: 'income' })}
-                className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
-                  catForm.type === 'income'
+                className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${catForm.type === 'income'
                     ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
                     : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
-                }`}
+                  }`}
               >
                 Income
               </button>
               <button
                 onClick={() => setCatForm({ ...catForm, type: 'expense' })}
-                className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
-                  catForm.type === 'expense'
+                className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${catForm.type === 'expense'
                     ? 'bg-red-500/15 border-red-500/30 text-red-400'
                     : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
-                }`}
+                  }`}
               >
                 Expense
               </button>
@@ -525,11 +553,10 @@ export default function SettingsPage() {
                 <button
                   key={icon}
                   onClick={() => setCatForm({ ...catForm, icon })}
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${
-                    catForm.icon === icon
+                  className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${catForm.icon === icon
                       ? 'bg-primary-500/20 border border-primary-500 scale-110'
                       : 'bg-surface-800 hover:bg-surface-700'
-                  }`}
+                    }`}
                 >
                   {icon}
                 </button>
@@ -544,9 +571,8 @@ export default function SettingsPage() {
                 <button
                   key={color}
                   onClick={() => setCatForm({ ...catForm, color })}
-                  className={`w-7 h-7 rounded-full transition-all ${
-                    catForm.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-900 scale-110' : ''
-                  }`}
+                  className={`w-7 h-7 rounded-full transition-all ${catForm.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-900 scale-110' : ''
+                    }`}
                   style={{ backgroundColor: color }}
                 />
               ))}
@@ -591,21 +617,19 @@ export default function SettingsPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setImportMode('replace')}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${
-                    importMode === 'replace'
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${importMode === 'replace'
                       ? 'bg-red-500/15 border-red-500/30 text-red-400'
                       : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
-                  }`}
+                    }`}
                 >
                   Replace All
                 </button>
                 <button
                   onClick={() => setImportMode('merge')}
-                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${
-                    importMode === 'merge'
+                  className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${importMode === 'merge'
                       ? 'bg-blue-500/15 border-blue-500/30 text-blue-400'
                       : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
-                  }`}
+                    }`}
                 >
                   Merge
                 </button>

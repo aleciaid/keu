@@ -28,6 +28,32 @@
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+/* CSS Variables - Dark Mode (default) */
+:root {
+  --text-primary: #ffffff;
+  --text-secondary: #f1f5f9;
+  --text-tertiary: #cbd5e1;
+  --bg-primary: #020617;
+  --bg-secondary: #0f172a;
+  --bg-tertiary: #1e293b;
+  --border-color: rgba(30, 41, 59, 0.5);
+  --card-bg: rgba(15, 23, 42, 0.8);
+  --input-bg: #1e293b;
+}
+
+/* CSS Variables - Light Mode */
+html.light {
+  --text-primary: #1e293b;
+  --text-secondary: #334155;
+  --text-tertiary: #64748b;
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --border-color: rgba(226, 232, 240, 0.8);
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }
@@ -39,18 +65,19 @@ html {
 }
 
 body {
-  background: var(--color-surface-950);
-  color: white;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
   overscroll-behavior-y: contain;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 input, select, textarea {
-  background: var(--color-surface-800);
-  border: 1px solid var(--color-surface-700);
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
-  color: white;
+  color: var(--text-primary);
   font-size: 0.875rem;
   outline: none;
   transition: all 0.2s;
@@ -59,7 +86,7 @@ input, select, textarea {
 }
 
 input::placeholder, textarea::placeholder {
-  color: var(--color-surface-400);
+  color: var(--text-tertiary);
 }
 
 input:focus, select:focus, textarea:focus {
@@ -68,30 +95,32 @@ input:focus, select:focus, textarea:focus {
 }
 
 select option {
-  background: var(--color-surface-800);
-  color: white;
+  background: var(--input-bg);
+  color: var(--text-primary);
 }
 
 /* === Component Classes (plain CSS) === */
 
 .card {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--card-bg);
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--border-color);
   border-radius: 1rem;
   padding: 1.25rem;
   transition: all 0.3s;
+  color: var(--text-primary);
 }
 
 .stat-card {
-  background: rgba(15, 23, 42, 0.8);
+  background: var(--card-bg);
   backdrop-filter: blur(24px);
-  border: 1px solid rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--border-color);
   border-radius: 1rem;
   padding: 1.25rem;
   transition: all 0.3s;
   position: relative;
   overflow: hidden;
+  color: var(--text-primary);
 }
 
 .btn {
@@ -188,13 +217,23 @@ select option {
   transition: all 0.2s;
   cursor: pointer;
   background: rgba(30, 41, 59, 0.5);
-  color: var(--color-surface-300);
-  border: 1px solid rgba(51, 65, 85, 0.5);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+html.light .btn-ghost {
+  background: #f1f5f9;
+  color: #475569;
 }
 
 .btn-ghost:hover {
   background: rgba(51, 65, 85, 0.5);
   color: white;
+}
+
+html.light .btn-ghost:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .btn-ghost:active {
@@ -244,6 +283,12 @@ select option {
   backdrop-filter: blur(24px);
   border-top: 1px solid rgba(30, 41, 59, 0.5);
   padding-bottom: env(safe-area-inset-bottom, 0);
+  color: var(--text-primary);
+}
+
+html.light .bottom-nav {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(226, 232, 240, 0.5);
 }
 
 .modal-overlay {
@@ -266,12 +311,13 @@ select option {
 }
 
 .modal-content {
-  background: var(--color-surface-900);
-  border: 1px solid rgba(30, 41, 59, 0.5);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 1.5rem 1.5rem 0 0;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  color: var(--text-primary);
 }
 
 @media (min-width: 640px) {
@@ -297,15 +343,13 @@ select option {
   justify-content: space-between;
   margin-bottom: 1.5rem;
   padding-top: 1rem;
+  color: var(--text-primary);
 }
 
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(to right, white, var(--color-surface-300));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .input-group {
@@ -317,7 +361,7 @@ select option {
 .input-label {
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--color-surface-400);
+  color: var(--text-tertiary);
 }
 
 .empty-state {
@@ -326,7 +370,7 @@ select option {
   align-items: center;
   justify-content: center;
   padding: 3rem 0;
-  color: var(--color-surface-500);
+  color: var(--text-tertiary);
 }
 
 .badge {
@@ -351,6 +395,10 @@ select option {
 ::-webkit-scrollbar-thumb {
   background: var(--color-surface-700);
   border-radius: 9999px;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
 }
 
 /* Number input arrows removal */
@@ -390,4 +438,47 @@ input[type="number"] {
 
 .animate-scaleIn {
   animation: scaleIn 0.2s ease-out;
+}
+
+/* Automatic Text Color Mapping for Light Mode */
+html.light .text-white {
+  color: var(--text-primary);
+}
+
+html.light .text-surface-300 {
+  color: var(--text-tertiary);
+}
+
+html.light .text-surface-400 {
+  color: var(--text-tertiary);
+}
+
+html.light .text-surface-500 {
+  color: var(--text-tertiary);
+}
+
+html.light .bg-surface-800\/50 {
+  background: rgba(241, 245, 249, 0.5);
+  border-color: rgba(226, 232, 240, 0.5);
+}
+
+html.light .bg-surface-800 {
+  background: rgba(241, 245, 249, 0.8);
+  border-color: rgba(226, 232, 240, 0.8);
+}
+
+html.light .hover\:bg-surface-800:hover {
+  background: rgba(226, 232, 240, 0.8);
+}
+
+html.light .hover\:bg-surface-800\/50:hover {
+  background: rgba(226, 232, 240, 0.5);
+}
+
+html.light .bg-surface-700\/50 {
+  background: rgba(226, 232, 240, 0.5);
+}
+
+html.light .bg-surface-700 {
+  background: rgba(226, 232, 240, 0.8);
 }
