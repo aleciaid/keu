@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "npm run optimize-icons && tsc && vite build",
+    "preview": "vite preview",
+    "optimize-icons": "svgo public/icon-192.svg public/icon-512.svg --pretty --indent 2 --multipass"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@vitejs/plugin-react": "^6.0.1",
+    "svgo": "^4.0.1",
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "vite": "^8.0.9"
