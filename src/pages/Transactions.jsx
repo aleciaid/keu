@@ -191,13 +191,13 @@ export default function Transactions({ openModal, onModalStateChange }) {
         toast.error('Pilih kategori');
         return;
       }
-      
+
       // Check if expense exceeds available balance for the wallet
       const walletBalance = walletBalances[form.walletId] || 0;
-      const availableForExpense = editTx && editTx.walletId === form.walletId 
-        ? walletBalance + editTx.amount 
+      const availableForExpense = editTx && editTx.walletId === form.walletId
+        ? walletBalance + editTx.amount
         : walletBalance;
-      
+
       if (form.amount > availableForExpense) {
         toast.error(`Saldo wallet tidak cukup. Tersedia: ${formatCompactIDR(availableForExpense)}`);
         return;
@@ -464,13 +464,12 @@ export default function Transactions({ openModal, onModalStateChange }) {
                       </div>
                       <div className="text-right shrink-0 flex items-center gap-2">
                         <span
-                          className={`text-sm font-bold ${
-                            tx.type === 'income'
+                          className={`text-sm font-bold ${tx.type === 'income'
                               ? 'text-emerald-400'
                               : tx.type === 'expense'
-                              ? 'text-red-400'
-                              : 'text-blue-400'
-                          }`}
+                                ? 'text-red-400'
+                                : 'text-blue-400'
+                            }`}
                         >
                           {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}
                           {formatIDR(tx.amount, false)}
@@ -491,11 +490,18 @@ export default function Transactions({ openModal, onModalStateChange }) {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editTx ? 'Edit Transaksi' : 'Transaksi Baru'}
+        footer={
+          <div className="flex gap-3">
+            <button onClick={() => setModalOpen(false)} className="btn-ghost flex-1">Batal</button>
+            <button onClick={handleSave} className="btn-primary flex-1">
+              {editTx ? 'Update' : 'Simpan'}
+            </button>
+          </div>
+        }
       >
         <div className="space-y-4">
           {/* Type Selector */}
@@ -506,9 +512,8 @@ export default function Transactions({ openModal, onModalStateChange }) {
                 <button
                   key={tb.type}
                   onClick={() => setTxType(tb.type)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all ${
-                    txType === tb.type ? `${tb.bg} ${tb.color}` : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
-                  }`}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all ${txType === tb.type ? `${tb.bg} ${tb.color}` : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
+                    }`}
                 >
                   <Icon size={14} />
                   {tb.label}
@@ -584,11 +589,10 @@ export default function Transactions({ openModal, onModalStateChange }) {
                     <button
                       key={cat.id}
                       onClick={() => setForm({ ...form, categoryId: cat.id })}
-                      className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${
-                        form.categoryId === cat.id
+                      className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${form.categoryId === cat.id
                           ? 'bg-primary-500/20 border border-primary-500/50'
                           : 'bg-surface-800/50 border border-transparent hover:bg-surface-700/50'
-                      }`}
+                        }`}
                     >
                       <span className="text-lg">{cat.icon}</span>
                       <span className="text-[10px] text-surface-300 leading-tight">{cat.name}</span>
@@ -622,7 +626,7 @@ export default function Transactions({ openModal, onModalStateChange }) {
             />
           </div>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-surface-900 border-t border-surface-800/50 mt-auto">
             <button onClick={() => setModalOpen(false)} className="btn-ghost flex-1">Batal</button>
             <button onClick={handleSave} className="btn-primary flex-1">
               {editTx ? 'Update' : 'Simpan'}

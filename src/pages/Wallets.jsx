@@ -270,11 +270,10 @@ export default function Wallets() {
                 <button
                   key={icon}
                   onClick={() => setForm({ ...form, icon })}
-                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all ${
-                    form.icon === icon
+                  className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all ${form.icon === icon
                       ? 'bg-primary-500/20 border-2 border-primary-500 scale-110'
                       : 'bg-surface-800 hover:bg-surface-700'
-                  }`}
+                    }`}
                 >
                   {icon}
                 </button>
@@ -289,9 +288,8 @@ export default function Wallets() {
                 <button
                   key={color}
                   onClick={() => setForm({ ...form, color })}
-                  className={`w-8 h-8 rounded-full transition-all ${
-                    form.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-900 scale-110' : 'hover:scale-105'
-                  }`}
+                  className={`w-8 h-8 rounded-full transition-all ${form.color === color ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-900 scale-110' : 'hover:scale-105'
+                    }`}
                   style={{ backgroundColor: color }}
                 />
               ))}

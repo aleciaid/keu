@@ -316,8 +316,58 @@ html.light .bottom-nav {
   border-radius: 1.5rem 1.5rem 0 0;
   width: 100%;
   max-height: 90vh;
-  overflow-y: auto;
   color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-body-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+}
+
+.modal-body {
+  padding: 1rem;
+}
+
+/* Sticky footer buttons */
+.modal-footer {
+  flex-shrink: 0;
+  padding: 1rem;
+  background: transparent;
+  position: sticky;
+  bottom: 0;
+  z-index: 60;
+  backdrop-filter: blur(8px);
+}
+
+.modal-body-wrapper > .modal-body + .modal-footer {
+  margin-top: 1rem;
+}
+
+/* Ensure content doesn't get cut off */
+.modal-body-wrapper > .modal-body {
+  min-height: 0;
+}
+
+.modal-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-height: 600px) {
+  .modal-content {
+    max-height: 95vh;
+  }
 }
 
 @media (min-width: 640px) {

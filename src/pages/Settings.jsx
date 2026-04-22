@@ -240,8 +240,8 @@ export default function SettingsPage() {
               key={section.id}
               onClick={() => setActiveSection(isActive ? null : section.id)}
               className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${isActive
-                  ? 'bg-primary-500/10 border border-primary-500/30'
-                  : 'bg-surface-800/50 hover:bg-surface-800 border border-transparent'
+                ? 'bg-primary-500/10 border border-primary-500/30'
+                : 'bg-surface-800/50 hover:bg-surface-800 border border-transparent'
                 }`}
             >
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isActive ? 'bg-primary-500/20' : 'bg-surface-700/50'
@@ -528,8 +528,8 @@ export default function SettingsPage() {
               <button
                 onClick={() => setCatForm({ ...catForm, type: 'income' })}
                 className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${catForm.type === 'income'
-                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
-                    : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                  : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
                   }`}
               >
                 Income
@@ -537,8 +537,8 @@ export default function SettingsPage() {
               <button
                 onClick={() => setCatForm({ ...catForm, type: 'expense' })}
                 className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${catForm.type === 'expense'
-                    ? 'bg-red-500/15 border-red-500/30 text-red-400'
-                    : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
+                  ? 'bg-red-500/15 border-red-500/30 text-red-400'
+                  : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
                   }`}
               >
                 Expense
@@ -554,8 +554,8 @@ export default function SettingsPage() {
                   key={icon}
                   onClick={() => setCatForm({ ...catForm, icon })}
                   className={`w-9 h-9 rounded-lg flex items-center justify-center transition-all ${catForm.icon === icon
-                      ? 'bg-primary-500/20 border border-primary-500 scale-110'
-                      : 'bg-surface-800 hover:bg-surface-700'
+                    ? 'bg-primary-500/20 border border-primary-500 scale-110'
+                    : 'bg-surface-800 hover:bg-surface-700'
                     }`}
                 >
                   {icon}
@@ -579,11 +579,13 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => setCatModalOpen(false)} className="btn-ghost flex-1">Batal</button>
-            <button onClick={saveCat} className="btn-primary flex-1">
-              {editCat ? 'Update' : 'Simpan'}
-            </button>
+          <div className="modal-footer">
+            <div className="flex gap-3">
+              <button onClick={() => setCatModalOpen(false)} className="btn-ghost flex-1">Batal</button>
+              <button onClick={saveCat} className="btn-primary flex-1">
+                {editCat ? 'Update' : 'Simpan'}
+              </button>
+            </div>
           </div>
         </div>
       </Modal>
@@ -618,8 +620,8 @@ export default function SettingsPage() {
                 <button
                   onClick={() => setImportMode('replace')}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${importMode === 'replace'
-                      ? 'bg-red-500/15 border-red-500/30 text-red-400'
-                      : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
+                    ? 'bg-red-500/15 border-red-500/30 text-red-400'
+                    : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
                     }`}
                 >
                   Replace All
@@ -627,8 +629,8 @@ export default function SettingsPage() {
                 <button
                   onClick={() => setImportMode('merge')}
                   className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${importMode === 'merge'
-                      ? 'bg-blue-500/15 border-blue-500/30 text-blue-400'
-                      : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
+                    ? 'bg-blue-500/15 border-blue-500/30 text-blue-400'
+                    : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
                     }`}
                 >
                   Merge
