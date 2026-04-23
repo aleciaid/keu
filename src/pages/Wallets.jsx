@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { formatIDR, formatDate } from '../utils/currency';
@@ -20,12 +20,19 @@ const WALLET_COLORS = [
   '#eab308', '#10b981', '#14b8a6', '#3b82f6', '#06b6d4',
 ];
 
-export default function Wallets() {
+export default function Wallets({ openModal, onModalStateChange }) {
   const wallets = useLiveQuery(() => db.wallets.toArray()) || [];
   const transactions = useLiveQuery(() => db.transactions.toArray()) || [];
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editWallet, setEditWallet] = useState(null);
+
+  useEffect(() => {
+    if (openModal) {
+      openCreate();
+      if (onModalStateChange) onModalStateChange(false);
+    }
+  }, [openModal]);
   const [deleteId, setDeleteId] = useState(null);
 
   const [form, setForm] = useState({

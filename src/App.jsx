@@ -13,6 +13,7 @@ export default function App() {
   const [page, setPage] = useState('dashboard');
   const [dbReady, setDbReady] = useState(false);
   const [openTransactionModal, setOpenTransactionModal] = useState(false);
+  const [openWalletModal, setOpenWalletModal] = useState(false);
   
   // Theme setup
   useEffect(() => {
@@ -104,15 +105,17 @@ export default function App() {
       <main className="min-h-screen">
         {page === 'dashboard' && <Dashboard onNavigate={handleNavigate} />}
         {page === 'transactions' && <Transactions openModal={openTransactionModal} onModalStateChange={setOpenTransactionModal} />}
-        {page === 'wallets' && <Wallets />}
+        {page === 'wallets' && <Wallets openModal={openWalletModal} onModalStateChange={setOpenWalletModal} />}
         {page === 'settings' && <Settings />}
       </main>
 
-      {/* FAB - Add Transaction */}
-      {(page === 'dashboard' || page === 'transactions') && (
+      {/* FAB - Add Transaction / Wallet */}
+      {(page === 'dashboard' || page === 'transactions' || page === 'wallets') && (
         <button
           onClick={() => {
-            if (page !== 'transactions') {
+            if (page === 'wallets') {
+              setOpenWalletModal(true);
+            } else if (page !== 'transactions') {
               setPage('transactions');
               setTimeout(() => {
                 setOpenTransactionModal(true);
@@ -122,7 +125,7 @@ export default function App() {
             }
           }}
           className="fab"
-          aria-label="Add Transaction"
+          aria-label="Add"
         >
           <Plus size={24} />
         </button>
