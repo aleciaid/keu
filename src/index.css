@@ -278,7 +278,7 @@ html.light .btn-ghost:hover {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 50;
+  z-index: 40;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(24px);
   border-top: 1px solid rgba(30, 41, 59, 0.5);
@@ -294,7 +294,7 @@ html.light .bottom-nav {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
+  z-index: 60;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   display: flex;
@@ -315,7 +315,9 @@ html.light .bottom-nav {
   border: 1px solid var(--border-color);
   border-radius: 1.5rem 1.5rem 0 0;
   width: 100%;
-  max-height: 90vh;
+  /* subtract bottom nav height (~64px) so footer is never hidden behind nav */
+  max-height: calc(90vh - 64px);
+  max-height: calc(90dvh - 64px);
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
@@ -324,56 +326,37 @@ html.light .bottom-nav {
 
 .modal-body-wrapper {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  scrollbar-gutter: stable;
 }
 
 .modal-body {
   padding: 1rem;
 }
 
-/* Sticky footer buttons */
+/* Footer always visible at bottom of modal */
 .modal-footer {
   flex-shrink: 0;
   padding: 1rem;
-  background: transparent;
-  position: sticky;
-  bottom: 0;
-  z-index: 60;
-  backdrop-filter: blur(8px);
-}
-
-.modal-body-wrapper > .modal-body + .modal-footer {
-  margin-top: 1rem;
-}
-
-/* Ensure content doesn't get cut off */
-.modal-body-wrapper > .modal-body {
-  min-height: 0;
-}
-
-.modal-body {
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  min-height: 0;
-  scrollbar-gutter: stable;
-  display: flex;
-  flex-direction: column;
-}
-
-@media (max-height: 600px) {
-  .modal-content {
-    max-height: 95vh;
-  }
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 @media (min-width: 640px) {
   .modal-content {
     max-width: 32rem;
+    max-height: 90vh;
+    max-height: 90dvh;
     border-radius: 1rem;
+  }
+}
+
+@media (max-height: 600px) {
+  .modal-content {
+    max-height: calc(95vh - 64px);
+    max-height: calc(95dvh - 64px);
   }
 }
 

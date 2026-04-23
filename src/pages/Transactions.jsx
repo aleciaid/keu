@@ -504,134 +504,127 @@ export default function Transactions({ openModal, onModalStateChange }) {
         }
       >
         <div className="space-y-4">
-          {/* Type Selector */}
-          <div className="flex gap-2">
-            {typeButtons.map((tb) => {
-              const Icon = tb.icon;
-              return (
-                <button
-                  key={tb.type}
-                  onClick={() => setTxType(tb.type)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all ${txType === tb.type ? `${tb.bg} ${tb.color}` : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
-                    }`}
-                >
-                  <Icon size={14} />
-                  {tb.label}
-                </button>
-              );
-            })}
-          </div>
+           {/* Type Selector */}
+           <div className="flex gap-2">
+             {typeButtons.map((tb) => {
+               const Icon = tb.icon;
+               return (
+                 <button
+                   key={tb.type}
+                   onClick={() => setTxType(tb.type)}
+                   className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold border transition-all ${txType === tb.type ? `${tb.bg} ${tb.color}` : 'bg-surface-800/50 border-surface-700/50 text-surface-400'
+                     }`}
+                 >
+                   <Icon size={14} />
+                   {tb.label}
+                 </button>
+               );
+             })}
+           </div>
 
-          {/* Amount */}
-          <div className="input-group">
-            <label className="input-label">Jumlah</label>
-            <AmountInput
-              value={form.amount}
-              onChange={(v) => setForm({ ...form, amount: v })}
-            />
-          </div>
+           {/* Amount */}
+           <div className="input-group">
+             <label className="input-label">Jumlah</label>
+             <AmountInput
+               value={form.amount}
+               onChange={(v) => setForm({ ...form, amount: v })}
+             />
+           </div>
 
-          {/* Conditional fields based on type */}
-          {txType === 'transfer' ? (
-            <>
-              <div className="input-group">
-                <label className="input-label">Dari Wallet</label>
-                <select
-                  value={form.fromWalletId}
-                  onChange={(e) => setForm({ ...form, fromWalletId: e.target.value })}
-                  className="w-full"
-                >
-                  <option value="">Pilih wallet asal</option>
-                  {wallets.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.icon} {w.name} ({formatIDR(walletBalances[w.id] || 0)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="input-group">
-                <label className="input-label">Ke Wallet</label>
-                <select
-                  value={form.toWalletId}
-                  onChange={(e) => setForm({ ...form, toWalletId: e.target.value })}
-                  className="w-full"
-                >
-                  <option value="">Pilih wallet tujuan</option>
-                  {wallets.filter((w) => w.id !== form.fromWalletId).map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.icon} {w.name} ({formatIDR(walletBalances[w.id] || 0)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="input-group">
-                <label className="input-label">Wallet</label>
-                <select
-                  value={form.walletId}
-                  onChange={(e) => setForm({ ...form, walletId: e.target.value })}
-                  className="w-full"
-                >
-                  <option value="">Pilih wallet</option>
-                  {wallets.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      {w.icon} {w.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="input-group">
-                <label className="input-label">Kategori</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {filteredCategories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setForm({ ...form, categoryId: cat.id })}
-                      className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${form.categoryId === cat.id
-                          ? 'bg-primary-500/20 border border-primary-500/50'
-                          : 'bg-surface-800/50 border border-transparent hover:bg-surface-700/50'
-                        }`}
-                    >
-                      <span className="text-lg">{cat.icon}</span>
-                      <span className="text-[10px] text-surface-300 leading-tight">{cat.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
+           {/* Conditional fields based on type */}
+           {txType === 'transfer' ? (
+             <>
+               <div className="input-group">
+                 <label className="input-label">Dari Wallet</label>
+                 <select
+                   value={form.fromWalletId}
+                   onChange={(e) => setForm({ ...form, fromWalletId: e.target.value })}
+                   className="w-full"
+                 >
+                   <option value="">Pilih wallet asal</option>
+                   {wallets.map((w) => (
+                     <option key={w.id} value={w.id}>
+                       {w.icon} {w.name} ({formatIDR(walletBalances[w.id] || 0)})
+                     </option>
+                   ))}
+                 </select>
+               </div>
+               <div className="input-group">
+                 <label className="input-label">Ke Wallet</label>
+                 <select
+                   value={form.toWalletId}
+                   onChange={(e) => setForm({ ...form, toWalletId: e.target.value })}
+                   className="w-full"
+                 >
+                   <option value="">Pilih wallet tujuan</option>
+                   {wallets.filter((w) => w.id !== form.fromWalletId).map((w) => (
+                     <option key={w.id} value={w.id}>
+                       {w.icon} {w.name} ({formatIDR(walletBalances[w.id] || 0)})
+                     </option>
+                   ))}
+                 </select>
+               </div>
+             </>
+           ) : (
+             <>
+               <div className="input-group">
+                 <label className="input-label">Wallet</label>
+                 <select
+                   value={form.walletId}
+                   onChange={(e) => setForm({ ...form, walletId: e.target.value })}
+                   className="w-full"
+                 >
+                   <option value="">Pilih wallet</option>
+                   {wallets.map((w) => (
+                     <option key={w.id} value={w.id}>
+                       {w.icon} {w.name}
+                     </option>
+                   ))}
+                 </select>
+               </div>
+               <div className="input-group">
+                 <label className="input-label">Kategori</label>
+                 <div className="grid grid-cols-4 gap-2">
+                   {filteredCategories.map((cat) => (
+                     <button
+                       key={cat.id}
+                       onClick={() => setForm({ ...form, categoryId: cat.id })}
+                       className={`flex flex-col items-center gap-1 p-2 rounded-xl text-center transition-all ${form.categoryId === cat.id
+                           ? 'bg-primary-500/20 border border-primary-500/50'
+                           : 'bg-surface-800/50 border border-transparent hover:bg-surface-700/50'
+                         }`}
+                     >
+                       <span className="text-lg">{cat.icon}</span>
+                       <span className="text-[10px] text-surface-300 leading-tight">{cat.name}</span>
+                     </button>
+                   ))}
+                 </div>
+               </div>
+             </>
+           )}
 
-          {/* Date */}
-          <div className="input-group">
-            <label className="input-label">Tanggal</label>
-            <input
-              type="date"
-              value={form.date}
-              onChange={(e) => setForm({ ...form, date: e.target.value })}
-              className="w-full"
-            />
-          </div>
+           {/* Date */}
+           <div className="input-group">
+             <label className="input-label">Tanggal</label>
+             <input
+               type="date"
+               value={form.date}
+               onChange={(e) => setForm({ ...form, date: e.target.value })}
+               className="w-full"
+             />
+           </div>
 
-          {/* Note */}
-          <div className="input-group">
-            <label className="input-label">Catatan (opsional)</label>
-            <input
-              type="text"
-              value={form.note}
-              onChange={(e) => setForm({ ...form, note: e.target.value })}
-              placeholder="Tambah catatan..."
-              className="w-full"
-            />
-          </div>
-
-          <div className="flex gap-3 pt-4 pb-2 sticky bottom-0 bg-surface-900 border-t border-surface-800/50 mt-auto">
-            <button onClick={() => setModalOpen(false)} className="btn-ghost flex-1">Batal</button>
-            <button onClick={handleSave} className="btn-primary flex-1">
-              {editTx ? 'Update' : 'Simpan'}
-            </button>
-          </div>
+           {/* Note */}
+           <div className="input-group">
+             <label className="input-label">Catatan (opsional)</label>
+             <input
+               type="text"
+               value={form.note}
+               onChange={(e) => setForm({ ...form, note: e.target.value })}
+               placeholder="Tambah catatan..."
+               className="w-full"
+             />
+           </div>
         </div>
       </Modal>
 

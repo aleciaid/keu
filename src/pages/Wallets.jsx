@@ -242,6 +242,14 @@ export default function Wallets() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editWallet ? 'Edit Wallet' : 'Buat Wallet Baru'}
+        footer={
+          <div className="flex gap-3">
+            <button onClick={() => setModalOpen(false)} className="btn-ghost flex-1">Batal</button>
+            <button onClick={handleSave} className="btn-primary flex-1">
+              {editWallet ? 'Update' : 'Simpan'}
+            </button>
+          </div>
+        }
       >
         <div className="space-y-4">
           <div className="input-group">
@@ -294,13 +302,6 @@ export default function Wallets() {
                 />
               ))}
             </div>
-          </div>
-
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => setModalOpen(false)} className="btn-ghost flex-1">Batal</button>
-            <button onClick={handleSave} className="btn-primary flex-1">
-              {editWallet ? 'Update' : 'Simpan'}
-            </button>
           </div>
         </div>
       </Modal>
