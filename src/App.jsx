@@ -70,7 +70,11 @@ export default function App() {
     }
   }, []);
 
-  const handleNavigate = useCallback((p) => setPage(p), []);
+  const handleNavigate = useCallback((p) => {
+    setPage(p);
+    setOpenWalletModal(false);
+    setOpenTransactionModal(false);
+  }, []);
 
   if (!dbReady) {
     return (

@@ -32,7 +32,7 @@ export default function Wallets({ openModal, onModalStateChange }) {
       openCreate();
       if (onModalStateChange) onModalStateChange(false);
     }
-  }, [openModal]);
+  }, [openModal, onModalStateChange]);
   const [deleteId, setDeleteId] = useState(null);
 
   const [form, setForm] = useState({
@@ -223,7 +223,7 @@ export default function Wallets({ openModal, onModalStateChange }) {
                       Saldo awal: {formatIDR(wallet.initialBalance)}
                     </p>
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-1">
                     <button
                       onClick={() => openEdit(wallet)}
                       className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-800 hover:bg-primary-500/20 text-surface-400 hover:text-primary-400 transition-colors"

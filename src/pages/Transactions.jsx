@@ -35,7 +35,7 @@ export default function Transactions({ openModal, onModalStateChange }) {
       openCreate();
       if (onModalStateChange) onModalStateChange(false);
     }
-  }, [openModal]);
+  }, [openModal, onModalStateChange]);
   const [editTx, setEditTx] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -476,7 +476,7 @@ export default function Transactions({ openModal, onModalStateChange }) {
                         </span>
                         <button
                           onClick={() => setDeleteId(tx.id)}
-                          className="w-7 h-7 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/20 text-surface-500 hover:text-red-400 transition-all"
+                          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-500/20 text-surface-500 hover:text-red-400 transition-all"
                         >
                           <Trash2 size={12} />
                         </button>

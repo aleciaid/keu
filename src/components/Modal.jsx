@@ -5,13 +5,18 @@ export default function Modal({ isOpen, onClose, title, children, footer, size =
   const [show, setShow] = useState(false);
 
   useEffect(() => {
+    let timer;
     if (isOpen) {
       setShow(true);
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      timer = setTimeout(() => setShow(false), 200);
     }
-    return () => { document.body.style.overflow = ''; };
+    return () => { 
+      document.body.style.overflow = ''; 
+      if (timer) clearTimeout(timer);
+    };
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
@@ -23,7 +28,7 @@ export default function Modal({ isOpen, onClose, title, children, footer, size =
 
   return (
     <div
-      className={`modal-overlay transition-opacity duration-200 ${show && isOpen ? 'opacity-100' : 'opacity-0'}`}
+      className={`modal-overlay transition-opacity duration-200 ${show && isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
     >
       <div className={`modal-content animate-slideUp ${size === 'large' ? 'sm:max-w-2xl' : ''}`}>

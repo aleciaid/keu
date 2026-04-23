@@ -288,7 +288,7 @@ export default function SettingsPage() {
                     style={{ backgroundColor: cat.color }}
                   />
                   {!cat.isDefault && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                    <div className="flex gap-1">
                       <button onClick={() => openCatEdit(cat)} className="p-1 hover:text-primary-400 text-surface-500">
                         <Pencil size={12} />
                       </button>
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                     style={{ backgroundColor: cat.color }}
                   />
                   {!cat.isDefault && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                    <div className="flex gap-1">
                       <button onClick={() => openCatEdit(cat)} className="p-1 hover:text-primary-400 text-surface-500">
                         <Pencil size={12} />
                       </button>
